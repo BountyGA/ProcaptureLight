@@ -1,0 +1,6 @@
+{
+  "name": "PROCAPTURE Light",
+  "description": "Storefront and management portal for PROCAPTURE Light business, allowing owners to update gear listings and stock, and clients to place orders seamlessly via WhatsApp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
