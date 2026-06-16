@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { ShoppingCart, LogIn, LogOut, Search, SlidersHorizontal, Sun, Camera, Lock, Clock } from 'lucide-react';
+import { ShoppingCart, LogIn, LogOut, Search, SlidersHorizontal, Sun, Camera, Lock, Clock, Moon } from 'lucide-react';
 
 interface HeaderProps {
   cartCount: number;
@@ -18,6 +18,8 @@ interface HeaderProps {
   categories: string[];
   orderCount: number;
   onHistoryToggle: () => void;
+  theme: 'dark' | 'light';
+  onThemeToggle: () => void;
 }
 
 export default function Header({
@@ -31,7 +33,9 @@ export default function Header({
   onCategoryChange,
   categories,
   orderCount,
-  onHistoryToggle
+  onHistoryToggle,
+  theme,
+  onThemeToggle
 }: HeaderProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -51,23 +55,29 @@ export default function Header({
   };
 
   return (
-    <header className="sticky top-0 z-45 w-full bg-black/60 backdrop-blur-md border-b border-white/10">
+    <header className={`sticky top-0 z-45 w-full backdrop-blur-md border-b transition-colors duration-200 ${
+      theme === 'light' ? 'bg-white/90 border-zinc-200 text-zinc-900' : 'bg-black/60 border-white/10 text-white'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 gap-4">
           
           {/* Logo Brand Group */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xs bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.25)]">
-              <Camera className="text-black w-5.5 h-5.5" />
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-black border-2 border-yellow-500 flex items-center justify-center">
-                <Sun className="text-yellow-500 w-2.5 h-2.5 animate-spin-slow" />
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xs bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.25)]">
+              <Camera className="text-black w-4.5 h-4.5 sm:w-5.5 sm:h-5.5" />
+              <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-black border border-yellow-500 flex items-center justify-center">
+                <Sun className="text-yellow-500 w-2 h-2 sm:w-2.5 sm:h-2.5 animate-spin-slow" />
               </div>
             </div>
             <div>
-              <span className="font-sans font-light text-xl tracking-tighter uppercase text-white block">
+              <span className={`font-sans font-light text-sm sm:text-xl tracking-tighter uppercase block leading-none ${
+                theme === 'light' ? 'text-zinc-900' : 'text-white'
+              }`}>
                 PROCAPTURE <span className="font-bold text-yellow-500">LIGHT</span>
               </span>
-              <span className="block text-[9px] font-mono tracking-widest text-white/40 uppercase leading-none -mt-0.5 font-semibold">
+              <span className={`block text-[8px] sm:text-[9px] font-mono tracking-widest uppercase leading-none mt-1 font-semibold ${
+                theme === 'light' ? 'text-zinc-500' : 'text-white/40'
+              }`}>
                 CONSOLE v2.04
               </span>
             </div>
@@ -76,7 +86,9 @@ export default function Header({
           {/* Quick Search Bar */}
           {!isAdmin && (
             <div className="hidden md:flex relative flex-1 max-w-sm mx-4">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-white/30">
+              <div className={`absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none ${
+                theme === 'light' ? 'text-zinc-400' : 'text-white/30'
+              }`}>
                 <Search size={14} />
               </div>
               <input
@@ -84,23 +96,58 @@ export default function Header({
                 value={searchTerm}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Search premium studio gear..."
-                className="w-full pl-9 pr-4 py-2 text-xs bg-white/5 border border-white/10 focus:border-yellow-500 rounded-lg text-white outline-none transition-all placeholder-white/20 font-mono"
+                className={`w-full pl-9 pr-4 py-2 text-xs border rounded-lg outline-none transition-all font-mono ${
+                  theme === 'light' 
+                    ? 'bg-zinc-100 border-zinc-200 text-zinc-900 focus:border-yellow-600 placeholder-zinc-400' 
+                    : 'bg-white/5 border-white/10 focus:border-yellow-500 text-white placeholder-white/20'
+                }`}
               />
             </div>
           )}
 
           {/* User Controls */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Status light concept from design */}
-            <div className="hidden xl:flex items-center gap-2.5 pr-3 border-r border-white/10 h-8">
+            <div className={`hidden xl:flex items-center gap-2.5 pr-3 border-r h-8 ${
+              theme === 'light' ? 'border-zinc-205' : 'border-white/10'
+            }`}>
               <div className="text-right">
-                <p className="text-[9px] text-white/30 uppercase tracking-tighter leading-none">Status</p>
-                <p className="text-[10px] font-mono text-green-400 font-semibold mt-0.5">LIVE_LAGOS_NG</p>
+                <p className={`text-[9px] uppercase tracking-tighter leading-none ${
+                  theme === 'light' ? 'text-zinc-500' : 'text-white/30'
+                }`}>Status</p>
+                <p className={`text-[10px] font-mono font-semibold mt-0.5 ${
+                  theme === 'light' ? 'text-green-600 font-bold' : 'text-green-400'
+                }`}>LIVE_LAGOS_NG</p>
               </div>
-              <div className="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center bg-black/40">
+              <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${
+                theme === 'light' ? 'border-zinc-200 bg-zinc-100' : 'border-white/10 bg-black/40'
+              }`}>
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
               </div>
             </div>
+
+            {/* User-facing High-Contrast Theme Toggle */}
+            <button
+              onClick={onThemeToggle}
+              className={`p-1.5 py-1 sm:p-2.5 rounded-lg border transition-all flex items-center justify-center cursor-pointer ${
+                theme === 'light'
+                  ? 'border-zinc-350 bg-zinc-100 text-zinc-850 hover:text-black hover:bg-zinc-200'
+                  : 'border-white/10 bg-[#0c0c0c] text-yellow-500 hover:text-white hover:bg-zinc-900'
+              }`}
+              title={theme === 'dark' ? 'Switch to High-Contrast Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? (
+                <div className="flex items-center gap-1">
+                  <Sun size={13} className="text-yellow-500 fill-yellow-500/10" />
+                  <span className="hidden sm:inline text-[10px] font-bold font-mono tracking-wider uppercase text-yellow-500">Light</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <Moon size={13} className="text-zinc-750 fill-zinc-700/10" />
+                  <span className="hidden sm:inline text-[10px] font-bold font-mono tracking-wider uppercase text-zinc-700">Dark</span>
+                </div>
+              )}
+            </button>
 
             {/* View Switching / Portal Trigger */}
             <button
@@ -112,22 +159,23 @@ export default function Header({
                   setShowLoginModal(true);
                 }
               }}
-              className={`px-3.5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all cursor-pointer ${
+              className={`p-1.5 py-1 sm:px-3 sm:py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all cursor-pointer ${
                 isAdmin
                   ? 'bg-yellow-500 text-black shadow-[0_0_20px_rgba(234,179,8,0.3)] hover:bg-yellow-405 font-mono'
-                  : 'bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 hover:text-white'
+                  : theme === 'light'
+                  ? 'bg-zinc-100 text-zinc-800 border border-zinc-200 hover:bg-zinc-200 hover:text-zinc-950 font-semibold'
+                  : 'bg-white/5 text-white/85 border border-white/10 hover:bg-white/10 hover:text-white font-semibold'
               }`}
             >
               {isAdmin ? (
-                <div className="flex items-center gap-1.5 font-semibold">
+                <div className="flex items-center gap-1 font-semibold">
                   <LogOut size={13} />
-                  <span>Exit Panel</span>
+                  <span className="hidden sm:inline">Exit Panel</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 font-semibold">
+                <div className="flex items-center gap-1 font-semibold">
                   <Lock size={13} />
-                  <span className="hidden sm:inline text-yellow-500/90 font-bold">Admin Portal</span>
-                  <span className="sm:hidden">Owner</span>
+                  <span className="hidden sm:inline text-yellow-505/90 font-bold">Admin Portal</span>
                 </div>
               )}
             </button>
@@ -137,13 +185,17 @@ export default function Header({
               <button
                 id="past-orders-history-drawer-trigger-btn"
                 onClick={onHistoryToggle}
-                className="relative py-2 px-3.5 rounded-lg border border-white/10 bg-white/5 text-white/85 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all flex items-center gap-2 cursor-pointer font-semibold uppercase tracking-wider text-xs"
+                className={`relative p-1.5 py-1 sm:px-3.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer font-semibold uppercase tracking-wider text-xs ${
+                  theme === 'light'
+                    ? 'border-zinc-200 bg-zinc-100 text-zinc-800 hover:text-black hover:bg-zinc-200'
+                    : 'border-white/10 bg-white/5 text-white/85 hover:text-white hover:bg-white/10 hover:border-white/20'
+                }`}
                 title="View past orders"
               >
                 <div className="relative">
-                  <Clock size={14} className="text-amber-400" />
+                  <Clock size={13} className="text-amber-500" />
                   {orderCount > 0 && (
-                    <span className="absolute -top-2.5 -right-2.5 inline-flex items-center justify-center px-1.5 py-0.5 text-[8px] font-bold leading-none text-black bg-amber-400 rounded-full">
+                    <span className="absolute -top-2 -right-2 inline-flex items-center justify-center min-w-[12px] h-3 px-1 text-[8px] font-bold leading-none text-black bg-amber-400 rounded-full">
                       {orderCount}
                     </span>
                   )}
@@ -157,13 +209,17 @@ export default function Header({
               <button
                 id="shopping-cart-drawer-trigger-btn"
                 onClick={onCartToggle}
-                className="relative py-2 px-3.5 rounded-lg border border-white/10 bg-white/5 text-white/85 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all flex items-center gap-2 cursor-pointer font-semibold uppercase tracking-wider text-xs"
+                className={`relative p-1.5 py-1 sm:px-3.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer font-semibold uppercase tracking-wider text-xs ${
+                  theme === 'light'
+                    ? 'border-zinc-200 bg-zinc-100 text-zinc-805 hover:text-black hover:bg-zinc-200'
+                    : 'border-white/10 bg-white/5 text-white/85 hover:text-white hover:bg-white/10 hover:border-white/20'
+                }`}
                 title="View cart list"
               >
                 <div className="relative">
-                  <ShoppingCart size={14} className="text-yellow-500" />
+                  <ShoppingCart size={13} className="text-yellow-500" />
                   {cartCount > 0 && (
-                    <span className="absolute -top-2.5 -right-2.5 inline-flex items-center justify-center px-1.5 py-0.5 text-[8px] font-bold leading-none text-black bg-yellow-500 rounded-full">
+                    <span className="absolute -top-2 -right-2 inline-flex items-center justify-center min-w-[12px] h-3 px-1 text-[8px] font-bold leading-none text-black bg-yellow-500 rounded-full">
                       {cartCount}
                     </span>
                   )}
@@ -176,10 +232,14 @@ export default function Header({
 
         {/* Categories Tab and Mobile Search (Only visible on customer portal) */}
         {!isAdmin && (
-          <div className="py-2 pb-4 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className={`py-2 pb-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+            theme === 'light' ? 'border-zinc-202' : 'border-white/15'
+          }`}>
             {/* Mobile Search input */}
             <div className="flex md:hidden relative w-full">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/30">
+              <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none ${
+                theme === 'light' ? 'text-zinc-400' : 'text-white/30'
+              }`}>
                 <Search size={13} />
               </div>
               <input
@@ -187,13 +247,19 @@ export default function Header({
                 value={searchTerm}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Search studio lights..."
-                className="w-full pl-9 pr-4 py-2 text-xs bg-white/5 border border-white/10 focus:border-yellow-500 rounded-md text-white outline-none"
+                className={`w-full pl-9 pr-4 py-2 text-xs border rounded-md outline-none transition-all ${
+                  theme === 'light'
+                    ? 'bg-zinc-100 border-zinc-200 text-zinc-900 focus:border-yellow-600'
+                    : 'bg-white/5 border-white/10 focus:border-yellow-500 text-white'
+                }`}
               />
             </div>
 
             {/* Tabs Scrollable Wrapper */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
-              <span className="text-[10px] font-bold tracking-[0.2em] text-white/30 uppercase shrink-0 mr-1.5 flex items-center gap-1 font-mono">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-0.5 w-full sm:w-auto">
+              <span className={`text-[10px] font-bold tracking-[0.2em] uppercase shrink-0 mr-1.5 flex items-center gap-1 font-mono ${
+                theme === 'light' ? 'text-zinc-500' : 'text-white/30'
+              }`}>
                 <SlidersHorizontal size={9} /> Category:
               </span>
               {categories.map((cat) => (
@@ -203,6 +269,8 @@ export default function Header({
                   className={`px-3 py-1.5 text-[11px] font-semibold tracking-wider rounded-md transition-all shrink-0 uppercase cursor-pointer ${
                     activeCategory === cat
                       ? 'bg-yellow-500 text-black font-extrabold shadow-[0_0_15px_rgba(234,179,8,0.2)]'
+                      : theme === 'light'
+                      ? 'bg-zinc-150 text-zinc-700 hover:text-zinc-950 hover:bg-zinc-200 border border-zinc-200'
                       : 'bg-[#0a0a0a] text-white/60 hover:text-white hover:bg-white/5 border border-white/5'
                   }`}
                 >
@@ -212,7 +280,9 @@ export default function Header({
             </div>
             
             {/* Sub header info message */}
-            <span className="text-[10px] font-mono text-white/40 tracking-tight text-right shrink-0 hidden lg:inline">
+            <span className={`text-[10px] font-mono tracking-tight text-right shrink-0 hidden lg:inline ${
+              theme === 'light' ? 'text-zinc-500' : 'text-white/40'
+            }`}>
               Instant checkout carries exact serial numbers directly to Registered WhatsApp
             </span>
           </div>

@@ -65,6 +65,10 @@ export default function AdminPanel({
   const [categoryError, setCategoryError] = useState('');
   const [categorySuccess, setCategorySuccess] = useState('');
 
+  // Deletion inline security gates (prevent blocked popups inside web preview iFrames)
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+  const [productToDeleteId, setProductToDeleteId] = useState<string | null>(null);
+
   // Sync category state when categories load or select empty
   React.useEffect(() => {
     if (!category && categories.length > 0) {
@@ -462,23 +466,39 @@ export default function AdminPanel({
                       </div>
                       
                       {/* Delete option */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const message = assignedCount > 0 
-                            ? `Warning: There are currently ${assignedCount} live product catalogs registered under "${cat}". If you delete this category, these products will persist in the database but might not be properly structured. Continue deleting "${cat}"?`
-                            : `Delete category "${cat}"?`;
-                          if (confirm(message)) {
-                            onDeleteCategory(cat);
-                            setCategorySuccess(`Category "${cat}" successfully retired.`);
-                            setTimeout(() => setCategorySuccess(''), 2000);
-                          }
-                        }}
-                        className="p-1 px-1.5 text-zinc-500 hover:text-rose-450 hover:bg-rose-950/15 border border-transparent hover:border-zinc-800 rounded transition-all cursor-pointer font-sans"
-                        title={`Delete ${cat}`}
-                      >
-                        <Trash2 size={11} />
-                      </button>
+                      {categoryToDelete === cat ? (
+                        <div className="flex items-center gap-1.5 shrink-0 bg-zinc-950 p-1 border border-zinc-900 rounded-lg">
+                          <span className="text-[9px] text-rose-450 font-mono select-none font-bold px-1">Sure?</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onDeleteCategory(cat);
+                              setCategoryToDelete(null);
+                              setCategorySuccess(`Category "${cat}" successfully retired.`);
+                              setTimeout(() => setCategorySuccess(''), 2500);
+                            }}
+                            className="text-[9px] font-extrabold bg-rose-600 hover:bg-rose-500 text-white px-2 py-0.5 rounded cursor-pointer transition-colors"
+                          >
+                            Retire
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setCategoryToDelete(null)}
+                            className="text-[9px] font-bold bg-zinc-850 hover:bg-zinc-700 text-zinc-400 hover:text-white px-1.5 py-0.5 rounded cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setCategoryToDelete(cat)}
+                          className="p-1 px-1.5 text-zinc-500 hover:text-rose-455 hover:bg-rose-950/15 border border-transparent hover:border-zinc-850 rounded transition-all cursor-pointer"
+                          title={`Delete ${cat}`}
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -612,24 +632,43 @@ export default function AdminPanel({
                         {/* Actions */}
                         <td className="p-3.5 text-right pr-4 shrink-0 whitespace-nowrap">
                           <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => startEditProduct(p)}
-                              className="p-1 px-2.5 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-350 hover:bg-amber-400 hover:text-black transition-all flex items-center gap-1.5 cursor-pointer text-[10px] font-bold"
-                              title="Edit item attributes"
-                            >
-                              <Edit2 size={10} /> Edit
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (confirm(`Confirm removing "${p.name}" permanent from catalog?`)) {
-                                  onDeleteProduct(p.id);
-                                }
-                              }}
-                              className="p-1.5 rounded-lg bg-zinc-900/60 hover:bg-rose-950/20 text-zinc-500 hover:text-rose-400 border border-zinc-800 hover:border-rose-900/40 transition-all cursor-pointer"
-                              title="Delete permanently"
-                            >
-                              <Trash2 size={11} />
-                            </button>
+                            {productToDeleteId === p.id ? (
+                              <div className="flex items-center gap-1.5 bg-zinc-900 border border-rose-900/40 p-1.5 rounded-lg">
+                                <span className="text-[10px] text-rose-400 font-bold px-1 select-none">Confirm Delete?</span>
+                                <button
+                                  onClick={() => {
+                                    onDeleteProduct(p.id);
+                                    setProductToDeleteId(null);
+                                  }}
+                                  className="px-2 py-1 text-[10px] font-black bg-rose-600 hover:bg-rose-500 rounded text-white cursor-pointer transition-colors"
+                                >
+                                  Yes, Delete
+                                </button>
+                                <button
+                                  onClick={() => setProductToDeleteId(null)}
+                                  className="px-2 py-1 text-[10px] bg-zinc-800 hover:bg-zinc-700/80 rounded text-zinc-350 cursor-pointer"
+                                >
+                                  No
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => startEditProduct(p)}
+                                  className="p-1 px-2.5 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-350 hover:bg-amber-400 hover:text-black transition-all flex items-center gap-1.5 cursor-pointer text-[10px] font-bold"
+                                  title="Edit item attributes"
+                                >
+                                  <Edit2 size={10} /> Edit
+                                </button>
+                                <button
+                                  onClick={() => setProductToDeleteId(p.id)}
+                                  className="p-1.5 rounded-lg bg-zinc-900/60 hover:bg-rose-950/20 text-zinc-500 hover:text-rose-400 border border-zinc-800 hover:border-rose-900/40 transition-all cursor-pointer"
+                                  title="Delete permanently"
+                                >
+                                  <Trash2 size={11} />
+                                </button>
+                              </>
+                            )}
                           </div>
                         </td>
 
