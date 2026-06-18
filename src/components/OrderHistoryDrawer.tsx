@@ -23,11 +23,10 @@ export default function OrderHistoryDrawer({
   if (!isOpen) return null;
 
   const formatNaira = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
+    return `₦${new Intl.NumberFormat('en-NG', {
+      minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    }).format(amount);
+    }).format(amount)}`;
   };
 
   const handleReInquire = (order: Order) => {

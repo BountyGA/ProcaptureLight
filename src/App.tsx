@@ -226,11 +226,10 @@ export default function App() {
 
     // Construct the WhatsApp message details
     const formatNairaVal = (amount: number) => {
-      return new Intl.NumberFormat('en-NG', {
-        style: 'currency',
-        currency: 'NGN',
+      return `₦${new Intl.NumberFormat('en-NG', {
+        minimumFractionDigits: 0,
         maximumFractionDigits: 0
-      }).format(amount);
+      }).format(amount)}`;
     };
 
     let message = `⚡ *PROCAPTURE LIGHT ACQUISITION REQUISITION* ⚡\n\n`;
@@ -732,7 +731,7 @@ export default function App() {
         theme === 'light' ? 'bg-zinc-100 border-zinc-200 text-zinc-500 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]' : 'bg-black border-white/10 text-white/40 shadow-2xl'
       }`}>
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1">
-          <span>NODE: 0816_420_3874</span>
+          <span>NODE: 0816_420_xxxx</span>
           <span className="hidden sm:inline text-zinc-500/50">|</span>
           <span>LATENCY: 14ms</span>
           <span className="hidden sm:inline text-zinc-500/50">|</span>
@@ -741,7 +740,7 @@ export default function App() {
         <div className={`text-[9px] font-bold uppercase tracking-[0.25em] text-center sm:text-right ${
           theme === 'light' ? 'text-yellow-605' : 'text-yellow-500'
         }`}>
-          PROCAPTURE PRO CONSOLE v2.04
+          PROCAPTURE PREMIUM STUDIO LIGHTS
         </div>
       </div>
 

@@ -60,11 +60,10 @@ export default function ProductCard({
     );
   };
 
-  const formattedPrice = new Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: 'NGN',
+  const formattedPrice = `₦${new Intl.NumberFormat('en-NG', {
+    minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(price);
+  }).format(price)}`;
 
   const isOutOfStock = quantityInStock === 0 || cartQuantity >= quantityInStock;
 

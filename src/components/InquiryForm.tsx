@@ -30,7 +30,7 @@ export default function InquiryForm() {
     };
 
     try {
-      const response = await fetch('https://formspree.io/f/placeholder_id', {
+      const response = await fetch('https://formspree.io/f/xaqzgnyq', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,38 +49,26 @@ export default function InquiryForm() {
         setSubmitStatus('error');
       }
     } catch (err) {
-      // For presentation/offline development, we tolerate/gracefully simulated success if the fetch fails due to a placeholder URL
-      console.warn('Formspree POST failed to unresolved placeholder URL. Simulating submission.');
-      setTimeout(() => {
-        setSubmitStatus('success');
-        setName('');
-        setEmail('');
-        setPhone('');
-        setMessage('');
-        setIsSubmitting(false);
-      }, 1000);
-      return;
+      console.error('Formspree POST failed:', err);
+      setSubmitStatus('error');
     }
 
     setIsSubmitting(false);
   };
 
   return (
-    <div id="formspree-studio-inquiry-section" className="border border-white/10 bg-gradient-to-b from-[#0a0a0a] to-[#040404] p-6 sm:p-8 rounded-2xl shadow-xl space-y-6">
+    <div id="procapture-studio-inquiry-section" className="border border-white/10 bg-gradient-to-b from-[#0a0a0a] to-[#040404] p-6 sm:p-8 rounded-2xl shadow-xl space-y-6">
       <div className="flex items-start gap-4 justify-between flex-col md:flex-row pb-4 border-b border-white/5">
         <div className="space-y-1.5">
           <span className="text-[10px] font-mono uppercase tracking-widest text-yellow-500 font-bold flex items-center gap-1.5">
             <HelpCircle size={10} className="text-yellow-500" /> Direct Studio Consultation
           </span>
           <h3 className="text-lg md:text-xl font-bold font-sans text-white uppercase tracking-tight">
-            Consult a Lighting Expert (Via FormSpree)
+            Consult a Lighting Expert
           </h3>
           <p className="text-xs text-white/50 leading-relaxed font-sans max-w-xl">
             Need custom package specifications or have unique courier/freight inquiries in Nigeria? Share your requirements and receive answers directly in your email.
           </p>
-        </div>
-        <div className="px-3.5 py-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-yellow-500 text-[10px] font-mono tracking-wider font-extrabold shrink-0 mt-2 md:mt-0">
-          FORMSPREE GATEWAY
         </div>
       </div>
 
@@ -95,7 +83,7 @@ export default function InquiryForm() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Gabriel Bounty"
+            placeholder="e.g. John Doe"
             className="w-full px-4 py-2.5 text-xs bg-black border border-white/10 rounded-xl text-white outline-none focus:border-yellow-500 font-sans"
           />
         </div>
@@ -110,7 +98,7 @@ export default function InquiryForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="e.g. gabriel@example.com"
+            placeholder="e.g. johndoe@example.com"
             className="w-full px-4 py-2.5 text-xs bg-black border border-white/10 rounded-xl text-white outline-none focus:border-yellow-500 font-sans"
           />
         </div>
@@ -124,7 +112,7 @@ export default function InquiryForm() {
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="e.g. +234 816 420 3874"
+            placeholder="e.g. +234 816 420 xxxx"
             className="w-full px-4 py-2.5 text-xs bg-black border border-white/10 rounded-xl text-white outline-none focus:border-yellow-500 font-mono"
           />
         </div>
@@ -139,7 +127,7 @@ export default function InquiryForm() {
             rows={4}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Describe your studio setup needs (e.g. 'I need a quotation for 5 LED Panels including heavy duty stands and softboxes sent to Lekki, Lagos...')"
+            placeholder="Describe your studio setup needs (e.g. 'I need a quotation for 5 LED Panels including heavy duty stands and softboxes...')"
             className="w-full px-4 py-2.5 text-xs bg-black border border-white/10 rounded-xl text-white outline-none focus:border-yellow-500 font-sans resize-none leading-relaxed"
           />
         </div>
@@ -150,7 +138,7 @@ export default function InquiryForm() {
             <div className="p-3.5 border border-emerald-500/20 bg-emerald-500/5 rounded-xl text-emerald-400 text-xs font-sans flex items-center gap-2">
               <CheckCircle2 size={15} className="shrink-0 text-emerald-500" />
               <span>
-                <strong>Submission Received!</strong> Thank you, your lighting inquiry is being dispatched via Formspree. Our team will read it and reply back to you very soon.
+                <strong>Submission Received!</strong> Thank you, your lighting inquiry is being dispatched. Our team will read it and reply back to you very soon.
               </span>
             </div>
           )}
@@ -158,7 +146,7 @@ export default function InquiryForm() {
             <div className="p-3.5 border border-rose-500/20 bg-rose-500/5 rounded-xl text-rose-400 text-xs font-sans flex items-center gap-2">
               <AlertCircle size={15} className="shrink-0 text-rose-500" />
               <span>
-                <strong>Dispatched Fail.</strong> There was a problem contacting the Formspree endpoint. Please check your network and try again.
+                <strong>Dispatch Failed.</strong> There was a problem transmitting your inquiry template. Please check your network and try again.
               </span>
             </div>
           )}

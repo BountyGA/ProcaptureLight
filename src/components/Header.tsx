@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { ShoppingCart, LogIn, LogOut, Search, SlidersHorizontal, Sun, Camera, Lock, Clock, Moon } from 'lucide-react';
+import ProcaptureLogo from './ProcaptureLogo';
 
 interface HeaderProps {
   cartCount: number;
@@ -62,25 +63,8 @@ export default function Header({
         <div className="flex items-center justify-between h-20 gap-4">
           
           {/* Logo Brand Group */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xs bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.25)]">
-              <Camera className="text-black w-4.5 h-4.5 sm:w-5.5 sm:h-5.5" />
-              <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-black border border-yellow-500 flex items-center justify-center">
-                <Sun className="text-yellow-500 w-2 h-2 sm:w-2.5 sm:h-2.5 animate-spin-slow" />
-              </div>
-            </div>
-            <div>
-              <span className={`font-sans font-light text-sm sm:text-xl tracking-tighter uppercase block leading-none ${
-                theme === 'light' ? 'text-zinc-900' : 'text-white'
-              }`}>
-                PROCAPTURE <span className="font-bold text-yellow-500">LIGHT</span>
-              </span>
-              <span className={`block text-[8px] sm:text-[9px] font-mono tracking-widest uppercase leading-none mt-1 font-semibold ${
-                theme === 'light' ? 'text-zinc-500' : 'text-white/40'
-              }`}>
-                CONSOLE v2.04
-              </span>
-            </div>
+          <div className="flex items-center shrink-0">
+            <ProcaptureLogo theme={theme} />
           </div>
 
           {/* Quick Search Bar */}

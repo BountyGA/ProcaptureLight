@@ -26,11 +26,10 @@ export default function ProductDetailModal({
 
   const { name, serialNumber, price, quantityInStock, imageUrl, category, description, features } = product;
 
-  const formattedPrice = new Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: 'NGN',
+  const formattedPrice = `₦${new Intl.NumberFormat('en-NG', {
+    minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(price);
+  }).format(price)}`;
 
   const isOutOfStock = quantityInStock === 0;
 
