@@ -6,6 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { INITIAL_PRODUCTS } from './data/initialProducts';
 import { Product, CartItem, Order, AdZone, AdStats } from './types';
+import { collection, doc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { db } from './lib/firebase';
 import Header from './components/Header';
 import ProductCard from './components/ProductCard';
 import ProductDetailModal from './components/ProductDetailModal';
@@ -81,18 +83,55 @@ export default function App() {
 
   // --- INITIALIZATION ---
   useEffect(() => {
-    // 1. Load products from localStorage or fall back to INITIAL_PRODUCTS
-    const localProds = localStorage.getItem('procapture_products_db');
-    if (localProds) {
-      try {
-        setProducts(JSON.parse(localProds));
-      } catch (e) {
-        setProducts(INITIAL_PRODUCTS);
+    // 1. Subscribe to products collection in real time
+    const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+    const unsubscribeProducts = onSnapshot(q, (snapshot) => {
+      const loadedProducts: Product[] = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        loadedProducts.push({
+          id: docSnap.id,
+          name: data.name || '',
+          serialNumber: data.serialNumber || '',
+          price: Number(data.price || 0),
+          quantityInStock: Number(data.quantityInStock ?? 0),
+          inStock: data.inStock !== false,
+          imageUrl: data.imageUrl || '',
+          category: data.category || '',
+          description: data.description || '',
+          features: data.features || [],
+          isFeatured: !!data.isFeatured,
+          createdAt: data.createdAt
+        });
+      });
+
+      if (snapshot.empty) {
+        console.log("Firestore products collection is empty. Seeding with INITIAL_PRODUCTS...");
+        INITIAL_PRODUCTS.forEach(async (p) => {
+          try {
+            await setDoc(doc(db, "products", p.id), {
+              name: p.name,
+              serialNumber: p.serialNumber,
+              price: p.price,
+              quantityInStock: p.quantityInStock,
+              inStock: p.inStock,
+              imageUrl: p.imageUrl,
+              category: p.category,
+              description: p.description,
+              features: p.features,
+              isFeatured: !!p.isFeatured,
+              createdAt: serverTimestamp()
+            });
+          } catch (err) {
+            console.error("Failed to seed product:", p.name, err);
+          }
+        });
+      } else {
+        setProducts(loadedProducts);
       }
-    } else {
-      setProducts(INITIAL_PRODUCTS);
-      localStorage.setItem('procapture_products_db', JSON.stringify(INITIAL_PRODUCTS));
-    }
+    }, (error) => {
+      console.error("Firestore loading error:", error);
+    });
 
     // 2. Load orders from localStorage
     const localOrders = localStorage.getItem('procapture_orders_db');
@@ -133,29 +172,60 @@ export default function App() {
       setCategories(defaultCategories);
       localStorage.setItem('procapture_categories_db', JSON.stringify(defaultCategories));
     }
+
+    return () => {
+      unsubscribeProducts();
+    };
   }, []);
 
   // --- ACTIONS & PERSISTENCE ---
-  const saveProducts = (updatedProds: Product[]) => {
-    setProducts(updatedProds);
-    localStorage.setItem('procapture_products_db', JSON.stringify(updatedProds));
+  const handleAddProduct = async (newProd: Product) => {
+    try {
+      await setDoc(doc(db, "products", newProd.id), {
+        name: newProd.name,
+        serialNumber: newProd.serialNumber,
+        price: Number(newProd.price),
+        quantityInStock: Number(newProd.quantityInStock),
+        inStock: newProd.inStock !== false,
+        imageUrl: newProd.imageUrl,
+        category: newProd.category,
+        description: newProd.description,
+        features: newProd.features || [],
+        isFeatured: !!newProd.isFeatured,
+        createdAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.error("Error adding product to Firestore:", err);
+    }
   };
 
-  const handleAddProduct = (newProd: Product) => {
-    const updated = [newProd, ...products];
-    saveProducts(updated);
+  const handleUpdateProduct = async (updatedProd: Product) => {
+    try {
+      const docRef = doc(db, "products", updatedProd.id);
+      await updateDoc(docRef, {
+        name: updatedProd.name,
+        serialNumber: updatedProd.serialNumber,
+        price: Number(updatedProd.price),
+        quantityInStock: Number(updatedProd.quantityInStock),
+        inStock: updatedProd.inStock !== false,
+        imageUrl: updatedProd.imageUrl,
+        category: updatedProd.category,
+        description: updatedProd.description,
+        features: updatedProd.features || [],
+        isFeatured: !!updatedProd.isFeatured
+      });
+    } catch (err) {
+      console.error("Error updating product in Firestore:", err);
+    }
   };
 
-  const handleUpdateProduct = (updatedProd: Product) => {
-    const updated = products.map((p) => (p.id === updatedProd.id ? updatedProd : p));
-    saveProducts(updated);
-  };
-
-  const handleDeleteProduct = (productId: string) => {
-    const updated = products.filter((p) => p.id !== productId);
-    saveProducts(updated);
-    // Remove from cart if it was there
-    setCart(cart.filter((item) => item.product.id !== productId));
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await deleteDoc(doc(db, "products", productId));
+      setCart((prev) => prev.filter((item) => item.product.id !== productId));
+    } catch (err) {
+      console.error("Error deleting product from Firestore:", err);
+    }
   };
 
   const handleUpdateOrderStatus = (orderId: string, status: 'Pending' | 'Shipped' | 'Completed') => {
@@ -181,15 +251,19 @@ export default function App() {
     setCategories(updatedCategories);
     localStorage.setItem('procapture_categories_db', JSON.stringify(updatedCategories));
 
-    // Fix product references: Re-assign products of the deleted category to the nearest active category or custom fallback
+    // Fix product references: Re-assign products of the deleted category to the nearest active category or custom fallback in Firestore
     const fallbackCategory = updatedCategories[0] || 'LED Panels';
-    const updatedProducts = products.map((p) => {
+    products.forEach(async (p) => {
       if (p.category === deletedCat) {
-        return { ...p, category: fallbackCategory };
+        try {
+          await updateDoc(doc(db, "products", p.id), {
+            category: fallbackCategory
+          });
+        } catch (err) {
+          console.error("Error updating product category in Firestore:", err);
+        }
       }
-      return p;
     });
-    saveProducts(updatedProducts);
 
     if (activeCategory === deletedCat) {
       setActiveCategory('All Gear');
@@ -274,16 +348,18 @@ export default function App() {
     setOrders(updatedOrders);
     localStorage.setItem('procapture_orders_db', JSON.stringify(updatedOrders));
 
-    // Deduct stock levels for checked out values
-    const updatedProducts = products.map((p) => {
-      const cartItem = cart.find((c) => c.product.id === p.id);
-      if (cartItem) {
-        const remaining = Math.max(0, p.quantityInStock - cartItem.quantity);
-        return { ...p, quantityInStock: remaining };
+    // Deduct stock levels for checked out values in Firestore
+    cart.forEach(async (c) => {
+      const remaining = Math.max(0, c.product.quantityInStock - c.quantity);
+      try {
+        await updateDoc(doc(db, "products", c.product.id), {
+          quantityInStock: remaining,
+          inStock: remaining > 0
+        });
+      } catch (err) {
+        console.error("Error updating stock quantity in Firestore:", err);
       }
-      return p;
     });
-    saveProducts(updatedProducts);
 
     // Increase AdSterra impression and stats from sales flow traffic
     const bonusImpressions = 45;

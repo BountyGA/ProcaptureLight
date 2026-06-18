@@ -9,11 +9,13 @@ export interface Product {
   serialNumber: string;
   price: number;
   quantityInStock: number;
+  inStock: boolean;
   imageUrl: string;
   category: string;
   description: string;
   features: string[]; // Specs list
   isFeatured?: boolean;
+  createdAt?: any;
 }
 
 export interface CartItem {

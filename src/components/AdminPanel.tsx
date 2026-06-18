@@ -9,6 +9,8 @@ import {
   Settings, CheckCircle, TrendingUp, HelpCircle, Save, Sliders, Play, Code, Layers 
 } from 'lucide-react';
 import { Product, Order, AdZone, AdStats } from '../types';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { storage } from '../lib/firebase';
 
 interface AdminPanelProps {
   products: Product[];
@@ -59,6 +61,8 @@ export default function AdminPanel({
   const [isFeatured, setIsFeatured] = useState(false);
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Category Manager Form State
   const [newCategoryInput, setNewCategoryInput] = useState('');
@@ -131,12 +135,18 @@ export default function AdminPanel({
       return;
     }
 
+    if (isUploading) {
+      setFormError('Please wait for the photo file to finish uploading to Firebase Storage.');
+      return;
+    }
+
     const payload: Product = {
       id: isEditing ? currentProductId : `pc-prod-${Date.now()}`,
       name: name.trim(),
       serialNumber: serialNumber.trim(),
       price: Number(price),
       quantityInStock: Number(quantity),
+      inStock: Number(quantity) > 0,
       imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=400&auto=format&fit=crop',
       category,
       description: description.trim(),
@@ -146,10 +156,10 @@ export default function AdminPanel({
 
     if (isEditing) {
       onUpdateProduct(payload);
-      setFormSuccess('Product successfully cataloged & updated.');
+      setFormSuccess('Product updated!');
     } else {
       onAddProduct(payload);
-      setFormSuccess('New gear successfully launched in store.');
+      setFormSuccess('Product added!');
     }
 
     setTimeout(() => {
@@ -318,26 +328,80 @@ export default function AdminPanel({
                   </div>
                 </div>
 
-                {/* Image URL with an explicit option to execute image_generation prompt */}
+                {/* Image Upload using Firebase Storage */}
                 <div>
                   <label className="block text-[10px] font-mono uppercase text-zinc-500 tracking-wider mb-1 flex justify-between items-center bg-zinc-950 p-1.5 rounded border border-zinc-900 mb-1.5">
-                    <span>Product Visual URL</span>
-                    <button
-                      type="button"
-                      onClick={handleAIImageGen}
-                      disabled={imageGeneratingState}
-                      className="text-[9px] font-sans font-bold text-black bg-amber-400 px-1.5 py-0.5 rounded flex items-center gap-1 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
-                    >
-                      {imageGeneratingState ? 'Generating...' : '💡 AI Studio Draw'}
-                    </button>
+                    <span>Product Photo (Upload to Cloud)</span>
+                    {isUploading && (
+                      <span className="text-[10px] text-amber-400 font-bold animate-pulse">
+                        UPLOADING {uploadProgress}%
+                      </span>
+                    )}
                   </label>
-                  <input
-                    type="url"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://images.unsplash.com/your-gear-photo..."
-                    className="w-full px-3.5 py-2 text-xs bg-neutral-900 border border-zinc-850 rounded-xl text-zinc-200 outline-none focus:border-amber-405 text-[11px]"
-                  />
+                  
+                  <div className="flex flex-col gap-2.5">
+                    <input
+                      type="file"
+                      id="product-photo-upload"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        setIsUploading(true);
+                        setUploadProgress(0);
+                        setFormError('');
+
+                        const timestamp = Date.now();
+                        const fileName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+                        const storagePath = `products/${timestamp}-${fileName}`;
+                        const storageRef = ref(storage, storagePath);
+
+                        const uploadTask = uploadBytesResumable(storageRef, file);
+
+                        uploadTask.on(
+                          'state_changed',
+                          (snapshot) => {
+                            const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                            setUploadProgress(progress);
+                          },
+                          (err) => {
+                            console.error('Image upload failed:', err);
+                            setFormError('Image upload failed: ' + err.message);
+                            setIsUploading(false);
+                          },
+                          async () => {
+                            try {
+                              const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                              setImageUrl(downloadUrl);
+                              setFormSuccess('Image uploaded successfully!');
+                              setIsUploading(false);
+                            } catch (err: any) {
+                              console.error('Failed to get download URL:', err);
+                              setFormError('Failed to capture URL: ' + err.message);
+                              setIsUploading(false);
+                            }
+                          }
+                        );
+                      }}
+                      className="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-mono file:uppercase file:font-semibold file:bg-amber-400 file:text-black hover:file:bg-amber-350 transition-all text-[11px] cursor-pointer"
+                    />
+
+                    {imageUrl && (
+                      <div className="flex items-center gap-3 bg-zinc-950 p-2 rounded-xl border border-zinc-900">
+                        <img 
+                          src={imageUrl} 
+                          alt="Uploaded product preview" 
+                          className="w-12 h-12 rounded object-cover border border-zinc-800"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <span className="block text-[8px] font-mono text-zinc-500 uppercase">Selected Visual Link</span>
+                          <span className="block text-[10px] text-zinc-400 truncate">{imageUrl}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -427,10 +491,15 @@ export default function AdminPanel({
                   )}
                   <button
                     type="submit"
-                    className="flex-1 py-2.5 px-4 text-xs font-bold text-black bg-amber-400 hover:bg-amber-300 rounded-xl active:scale-95 transition-all text-center uppercase tracking-wider font-mono flex items-center justify-center gap-1.5 cursor-pointer"
+                    disabled={isUploading}
+                    className={`flex-1 py-2.5 px-4 text-xs font-bold rounded-xl active:scale-95 transition-all text-center uppercase tracking-wider font-mono flex items-center justify-center gap-1.5 cursor-pointer ${
+                      isUploading 
+                        ? 'bg-zinc-805 text-zinc-550 border border-zinc-800 cursor-not-allowed opacity-50' 
+                        : 'text-black bg-amber-400 hover:bg-amber-300'
+                    }`}
                   >
                     <Save size={13} />
-                    <span>{isEditing ? 'Save Changes' : 'Catalog Gear'}</span>
+                    <span>{isUploading ? 'Uploading...' : isEditing ? 'Save Changes' : 'Catalog Gear'}</span>
                   </button>
                 </div>
               </form>
@@ -619,13 +688,35 @@ export default function AdminPanel({
 
                         {/* Stock */}
                         <td className="p-3.5">
-                          <span className={`font-mono font-bold ${
-                            isOutStr ? 'text-rose-500' : isLow ? 'text-amber-500' : 'text-zinc-300'
-                          }`}>
-                            {p.quantityInStock} units
-                          </span>
-                          {isOutStr && <span className="block text-[8px] text-rose-550 font-sans mt-0.5">RESTOCK REQD</span>}
-                          {isLow && <span className="block text-[8px] text-amber-550 font-sans mt-0.5">LIMITED</span>}
+                          <div className="flex flex-col gap-1.5 justify-start">
+                            <span className={`font-mono font-bold ${
+                              !p.inStock || isOutStr ? 'text-rose-500' : isLow ? 'text-amber-500' : 'text-zinc-300'
+                            }`}>
+                              {p.inStock ? `${p.quantityInStock} units` : 'Out of Stock'}
+                            </span>
+                            
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const nextInStock = !p.inStock;
+                                onUpdateProduct({
+                                  ...p,
+                                  inStock: nextInStock,
+                                  quantityInStock: nextInStock ? (p.quantityInStock > 0 ? p.quantityInStock : 10) : 0
+                                });
+                              }}
+                              className={`text-[9px] font-sans font-bold uppercase py-0.5 px-2 rounded w-fit cursor-pointer transition-all ${
+                                p.inStock
+                                  ? 'bg-rose-550/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20'
+                                  : 'bg-emerald-550/10 text-emerald-450 border border-emerald-500/20 hover:bg-emerald-500/20'
+                              }`}
+                              title={p.inStock ? "Click to set as Out of Stock" : "Click to set as In Stock"}
+                            >
+                              {p.inStock ? 'Set Out of Stock' : 'Set In Stock'}
+                            </button>
+                            
+                            {isLow && p.inStock && <span className="block text-[8px] text-amber-550 font-sans mt-0.5">LIMITED</span>}
+                          </div>
                         </td>
 
                         {/* Actions */}

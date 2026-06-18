@@ -27,7 +27,7 @@ export default function ProductCard({
 
   // Stock status styling helpers
   const getStockBadge = () => {
-    if (quantityInStock === 0) {
+    if (!product.inStock || quantityInStock === 0) {
       return theme === 'light' ? (
         <span className="inline-flex items-center gap-1 text-[10px] bg-rose-50 border border-rose-200 text-rose-700 px-2.5 py-0.5 rounded-full font-bold">
           <AlertTriangle size={10} /> Out of Stock
@@ -65,7 +65,7 @@ export default function ProductCard({
     maximumFractionDigits: 0
   }).format(price)}`;
 
-  const isOutOfStock = quantityInStock === 0 || cartQuantity >= quantityInStock;
+  const isOutOfStock = !product.inStock || quantityInStock === 0 || cartQuantity >= quantityInStock;
 
   return (
     <div className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 shadow-xl flex flex-col ${

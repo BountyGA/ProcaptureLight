@@ -31,7 +31,7 @@ export default function ProductDetailModal({
     maximumFractionDigits: 0
   }).format(price)}`;
 
-  const isOutOfStock = quantityInStock === 0;
+  const isOutOfStock = !product.inStock || quantityInStock === 0;
 
   const handleQtyAdjust = (delta: number) => {
     if (!onUpdateCartQuantity) return;
