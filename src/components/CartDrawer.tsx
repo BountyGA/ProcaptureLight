@@ -63,7 +63,7 @@ export default function CartDrawer({
   const totalCost = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
 
   const formatNaira = (amount: number) => {
-    return `₦${new Intl.NumberFormat('en-NG', {
+    return `\u20A6${new Intl.NumberFormat('en-NG', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount)}`;

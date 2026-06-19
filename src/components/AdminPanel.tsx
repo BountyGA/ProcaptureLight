@@ -42,7 +42,7 @@ export default function AdminPanel({
   onDeleteCategory
 }: AdminPanelProps) {
   // Tabs management
-  const [activeTab, setActiveTab] = useState<'inventory' | 'orders' | 'monetization'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory');
 
   // Product Form state
   const [isEditing, setIsEditing] = useState(false);
@@ -194,7 +194,7 @@ export default function AdminPanel({
   };
 
   const formatCurrency = (amt: number) => {
-    return `₦${new Intl.NumberFormat('en-NG', {
+    return `\u20A6${new Intl.NumberFormat('en-NG', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amt)}`;
@@ -210,36 +210,28 @@ export default function AdminPanel({
             <Settings className="text-amber-400" /> PROCAPTURE Light — Storeowner Portal
           </h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Realtime database sync, CRM WhatsApp logs and AdSterra strategic ad monetization control.
+            Manage your product inventory and track store activity.
           </p>
         </div>
 
-        {/* Tab Switchers */}
-        <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-900 overflow-x-auto shrink-0">
-          <button
-            onClick={() => setActiveTab('inventory')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'inventory' ? 'bg-amber-400 text-black' : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Package size={13} /> Inventory Manager
-          </button>
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'orders' ? 'bg-amber-400 text-black' : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <ShoppingBag size={13} /> CRM Orders log ({orders.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('monetization')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'monetization' ? 'bg-amber-400 text-black' : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <TrendingUp size={13} /> AdSterra Monetization
-          </button>
+        {/* Simple Store Stats */}
+        <div className="flex bg-zinc-950 p-2.5 rounded-xl border border-zinc-900 items-center gap-5 divide-x divide-zinc-850 shrink-0">
+          <div className="px-1.5">
+            <span className="block text-[8px] font-mono text-zinc-500 uppercase tracking-wider font-bold">Total Products</span>
+            <span className="text-xs font-black text-white">{products.length}</span>
+          </div>
+          <div className="pl-5 pr-1.5">
+            <span className="block text-[8px] font-mono text-emerald-500 uppercase tracking-wider font-bold">In-Stock</span>
+            <span className="text-xs font-black text-emerald-400">
+              {products.filter(p => (p.quantityInStock || 0) > 0).length}
+            </span>
+          </div>
+          <div className="pl-5 pr-1.5">
+            <span className="block text-[8px] font-mono text-rose-500 uppercase tracking-wider font-bold">Out-Of-Stock</span>
+            <span className="text-xs font-black text-rose-450">
+              {products.filter(p => (p.quantityInStock || 0) === 0).length}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -301,7 +293,7 @@ export default function AdminPanel({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-mono uppercase text-zinc-500 tracking-wider mb-1.5">Price (NGN ₦)</label>
+                    <label className="block text-[10px] font-mono uppercase text-zinc-500 tracking-wider mb-1.5">Price (NGN &#8358;)</label>
                     <input
                       type="number"
                       required
@@ -773,300 +765,6 @@ export default function AdminPanel({
                 </div>
               )}
             </div>
-          </div>
-
-        </div>
-      )}
-
-      {/* -------------------- CRM ORDERS LOG TAB -------------------- */}
-      {activeTab === 'orders' && (
-        <div className="border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl shadow-xl space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-black text-white">Simulated CRM Orders History</h3>
-              <p className="text-xs text-zinc-500 mt-1">
-                A localized track of user checkout requests. These logs match the messages dispatched to your WhatsApp account.
-              </p>
-            </div>
-            <div className="p-3 px-4 bg-zinc-900 border border-zinc-850 rounded-xl flex items-center gap-3">
-              <div>
-                <span className="block text-[8px] font-mono text-zinc-500 uppercase">Gross Simulated Pipeline</span>
-                <span className="text-sm font-extrabold text-amber-400">
-                  {formatCurrency(orders.reduce((sum, o) => sum + o.totalCost, 0))}
-                </span>
-              </div>
-              <div className="border-l border-zinc-800 pl-3">
-                <span className="block text-[8px] font-mono text-zinc-500 uppercase">Transactions log</span>
-                <span className="text-sm font-extrabold text-white">{orders.length} orders</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto rounded-xl border border-zinc-900">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-zinc-950 border-b border-zinc-900 text-zinc-650 font-mono uppercase tracking-wider">
-                  <th className="p-3.5 pl-4">Order ID & Date</th>
-                  <th className="p-3.5">Customer Name</th>
-                  <th className="p-3.5">Ordered Items (Qty X Model)</th>
-                  <th className="p-3.5">Consolidated Cost</th>
-                  <th className="p-3.5">Route</th>
-                  <th className="p-3.5">Status</th>
-                  <th className="p-3.5 text-right pr-4">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-900 bg-zinc-950/20">
-                {orders.map((o) => (
-                  <tr key={o.id} className="hover:bg-zinc-900/30 transition-all">
-                    
-                    {/* ID & Date */}
-                    <td className="p-3.5 pl-4">
-                      <span className="font-mono text-zinc-200 block font-bold">{o.id}</span>
-                      <span className="text-[10px] text-zinc-500 block">{o.date}</span>
-                    </td>
-
-                    {/* Customer */}
-                    <td className="p-3.5 font-bold text-zinc-300">{o.customerName || 'Anonymous User'}</td>
-
-                    {/* Serial Numbers & Subtotals */}
-                    <td className="p-3.5 space-y-1">
-                      {o.items.map((it, idx) => (
-                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-1.5 text-[11px] text-zinc-400 leading-normal">
-                          <span className="font-bold text-zinc-300 shrink-0">[{it.quantity}X]</span>
-                          <span className="truncate max-w-[150px]">{it.name}</span>
-                          <span className="text-[10px] font-mono text-amber-500 flex items-center gap-0.5">
-                            ({it.serialNumber})
-                          </span>
-                        </div>
-                      ))}
-                    </td>
-
-                    {/* Total Cost */}
-                    <td className="p-3.5 font-black text-white">{formatCurrency(o.totalCost)}</td>
-
-                    {/* Route */}
-                    <td className="p-3.5">
-                      <span className="inline-flex items-center gap-1 text-[9px] bg-emerald-950/30 border border-emerald-500/20 text-emerald-450 px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
-                        WhatsApp Link
-                      </span>
-                    </td>
-
-                    {/* Status */}
-                    <td className="p-3.5">
-                      <span className={`inline-flex items-center text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                        o.status === 'Completed'
-                          ? 'bg-emerald-950/40 text-emerald-450 border border-emerald-500/10'
-                          : o.status === 'Shipped'
-                          ? 'bg-blue-950/40 text-blue-450 border border-blue-500/10'
-                          : 'bg-zinc-900 text-zinc-450 border border-zinc-800'
-                      }`}>
-                        {o.status}
-                      </span>
-                    </td>
-
-                    {/* Actions dropdown */}
-                    <td className="p-3.5 text-right pr-4">
-                      <select
-                        value={o.status}
-                        onChange={(e) => onUpdateOrderStatus(o.id, e.target.value as any)}
-                        className="bg-zinc-900 border border-zinc-800 text-[10px] font-bold text-zinc-300 rounded px-2 py-1 outline-none focus:border-amber-400 cursor-pointer"
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="Shipped">Dispatched</option>
-                        <option value="Completed">Delivered</option>
-                      </select>
-                    </td>
-
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {orders.length === 0 && (
-              <div className="p-8 text-center text-zinc-650">
-                <ShoppingBag className="mx-auto mb-2 opacity-30" size={32} />
-                <span>Simulated Order list is clean. Perform checkouts in customer mode to spawn logs.</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* -------------------- ADSTERRA MONETIZATION CONTROL PANEL -------------------- */}
-      {activeTab === 'monetization' && (
-        <div className="space-y-8">
-          
-          {/* Section 1: Monetization Stats Block */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="relative overflow-hidden border border-zinc-900 bg-zinc-950/60 p-6 rounded-2xl shadow-xl flex items-center justify-between">
-              <div className="space-y-1.5">
-                <span className="text-[8px] font-mono uppercase tracking-wider text-zinc-500 block font-bold">Estimated AdSterra Impressions</span>
-                <div className="text-3xl font-black text-white tracking-tight">
-                  {adStats.views.toLocaleString()}
-                </div>
-                <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-sans">
-                  🚀 +14.2% Growth This Month
-                </span>
-              </div>
-              <div className="h-10 w-10 bg-zinc-900 rounded-xl flex items-center justify-center border border-zinc-850 text-zinc-400 shrink-0">
-                <TrendingUp size={20} />
-              </div>
-            </div>
-
-            <div className="relative overflow-hidden border border-zinc-900 bg-zinc-950/60 p-6 rounded-2xl shadow-xl flex items-center justify-between">
-              <div className="space-y-1.5">
-                <span className="text-[8px] font-mono uppercase tracking-wider text-zinc-500 block font-bold">Strategic Ad Clickthroughs</span>
-                <div className="text-3xl font-black text-white tracking-tight">
-                  {adStats.clicks.toLocaleString()}
-                </div>
-                <span className="text-[10px] text-amber-400 font-mono">
-                  CTR Value: {( (adStats.clicks / (adStats.views || 1)) * 100).toFixed(2)}% Avg
-                </span>
-              </div>
-              <div className="h-10 w-10 bg-zinc-900 rounded-xl flex items-center justify-center border border-zinc-850 text-amber-400 shrink-0">
-                <PlusCircle size={20} />
-              </div>
-            </div>
-
-            <div className="relative overflow-hidden border border-zinc-900 bg-zinc-950 shadow-2xl p-6 rounded-2xl flex items-center justify-between">
-              <div className="space-y-1.5">
-                <span className="text-[8px] font-mono uppercase tracking-wider text-amber-500 block font-bold">Simulated AdSterra Earnings</span>
-                <div className="text-3xl font-black text-amber-400 tracking-tight">
-                  {formatCurrency(adStats.earnings)}
-                </div>
-                <span className="text-[10px] text-zinc-500 font-sans">
-                  Calculated based on ₦1,200 ($1.50) CPM
-                </span>
-              </div>
-              <div className="h-10 w-10 bg-amber-400/10 border border-amber-400/20 text-amber-400 rounded-xl flex items-center justify-center shrink-0">
-                <DollarSign size={20} />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 2: Instructions and Layout Management split */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            {/* Left box: Layout config */}
-            <div className="border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl space-y-6 shadow-xl relative">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-bold">Implementation Settings</span>
-                <h3 className="text-lg font-black text-white mt-1">Configuring Ad Slots</h3>
-                <p className="text-xs text-zinc-500 mt-1">Activate, disable, or paste direct script and iframe tags provided by your AdSterra account.</p>
-              </div>
-
-              <div className="space-y-5">
-                {adZones.map((zone) => (
-                  <div key={zone.id} className="p-4 rounded-xl border border-zinc-900 bg-zinc-950/40 space-y-3.5">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-xs font-bold text-zinc-200">{zone.name}</h4>
-                          <span className="text-[9px] font-mono text-zinc-500 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">
-                            {zone.format}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-zinc-500 mt-0.5">{zone.description}</p>
-                      </div>
-
-                      {/* Active Toggle */}
-                      <label className="relative inline-flex items-center cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={zone.isActive}
-                          onChange={(e) => onUpdateAdZone(zone.id, { isActive: e.checked || e.target.checked })}
-                          className="sr-only peer"
-                        />
-                        <div className="w-8 h-4 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-zinc-300 after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3.5 after:transition-all dark:border-zinc-600 peer-checked:bg-amber-400 peer-checked:after:bg-black"></div>
-                      </label>
-                    </div>
-
-                    {/* Code injector text input */}
-                    {zone.isActive && (
-                      <div className="space-y-1.5 pt-2 border-t border-zinc-900/40">
-                        <label className="block text-[9px] font-mono uppercase text-zinc-500 text-zinc-400 flex items-center gap-1">
-                          <Code size={11} className="text-amber-400" /> HTML Script / Iframe Code Block
-                        </label>
-                        <textarea
-                          value={zone.htmlCode || ''}
-                          onChange={(e) => onUpdateAdZone(zone.id, { htmlCode: e.target.value })}
-                          placeholder='e.g. <script type="text/javascript">atOptions = { "key" : "your_adsterra_key" };</script>'
-                          className="w-full px-3 py-2 text-[10px] font-mono bg-neutral-900 border border-zinc-850 rounded-lg text-zinc-400 outline-none focus:border-amber-400 h-16 leading-relaxed"
-                        />
-                        <span className="text-[9px] font-sans text-zinc-650 block">
-                          💡 Leave empty to display the beautiful default camera accessory sponsor placeholder.
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right box: Instructions & Guidelines on AdSterra partnership */}
-            <div className="border border-zinc-900 bg-zinc-950/20 p-6 rounded-2xl shadow-xl space-y-6">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-bold">Guidelines</span>
-                <h3 className="text-lg font-black text-white mt-1">Monetizing with AdSterra Ads</h3>
-                <p className="text-xs text-zinc-500 mt-1">Follow these simple instructions to connect your actual AdSterra dashboard and earn real cash.</p>
-              </div>
-
-              <div className="space-y-4 text-xs text-zinc-400 leading-relaxed">
-                <div className="flex gap-3">
-                  <div className="w-6 h-6 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white shrink-0 text-[11px]">1</div>
-                  <div>
-                    <h5 className="font-bold text-zinc-200">Register as a Publisher</h5>
-                    <p className="text-zinc-500 mt-0.5">
-                      Go to <a href="https://adsterra.com/" target="_blank" rel="noreferrer" className="text-amber-400 hover:underline">adsterra.com</a> and sign up for a Publisher account. Adding a password and payment method is simple.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="w-6 h-6 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white shrink-0 text-[11px]">2</div>
-                  <div>
-                    <h5 className="font-bold text-zinc-200">Register your App URL</h5>
-                    <p className="text-zinc-500 mt-0.5">
-                      Submit your AI Studio hosted App URL (look at your development or shared URL in the preview margins) under "Add Website". Set website category to "Books" or "E-commerce/Utilities".
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="w-6 h-6 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white shrink-0 text-[11px]">3</div>
-                  <div>
-                    <h5 className="font-bold text-zinc-200">Create Ad Codes</h5>
-                    <p className="text-zinc-500 mt-0.5">
-                      Generate Banner codes of the desired formats: **728x90 Leaderboard** for desktops, **320x50** for mobile screens, or **300x250 Medium Rectangles** for grid components.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="w-6 h-6 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white shrink-0 text-[11px]">4</div>
-                  <div>
-                    <h5 className="font-bold text-zinc-200">Inject Scripts & Enjoy Cashflow</h5>
-                    <p className="text-zinc-500 mt-0.5">
-                      Toggle the corresponding Ad Slot to <span className="text-emerald-400 font-semibold font-mono">ON</span> on the left, paste the javascript snippet from AdSterra, and save. The app will immediately begin projecting live AdSterra ads to customers world-wide!
-                    </p>
-                  </div>
-                </div>
-
-                {/* Helpful tips card */}
-                <div className="p-4 rounded-xl border border-amber-500/10 bg-amber-500/5 text-[11px] text-zinc-400 space-y-1.5 pt-3">
-                  <span className="font-bold text-amber-500 font-mono block uppercase tracking-widest text-[9px] flex items-center gap-1">
-                    <HelpCircle size={11} /> Pro Tips for High Impressions
-                  </span>
-                  <p>
-                    1. Keep the <strong className="text-zinc-200">Grid Native Slot</strong> active; it blends styled sponsor banners between your camera gear listings, yielding high clickthrough rates.
-                  </p>
-                  <p>
-                    2. Avoid excessive ad codes; keeping 2 static slots active provides a spectacular balance of visual aesthetics and high monetization revenue.
-                  </p>
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
       )}

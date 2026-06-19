@@ -23,7 +23,7 @@ export default function OrderHistoryDrawer({
   if (!isOpen) return null;
 
   const formatNaira = (amount: number) => {
-    return `₦${new Intl.NumberFormat('en-NG', {
+    return `\u20A6${new Intl.NumberFormat('en-NG', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount)}`;

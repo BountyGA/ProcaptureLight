@@ -300,7 +300,7 @@ export default function App() {
 
     // Construct the WhatsApp message details
     const formatNairaVal = (amount: number) => {
-      return `₦${new Intl.NumberFormat('en-NG', {
+      return `\u20A6${new Intl.NumberFormat('en-NG', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
       }).format(amount)}`;
@@ -383,7 +383,7 @@ export default function App() {
     const updatedStats = {
       ...adStats,
       clicks: adStats.clicks + 1,
-      earnings: adStats.earnings + 250 // simulated CPC payout (₦250)
+      earnings: adStats.earnings + 250 // simulated CPC payout (\u20A6250)
     };
     setAdStats(updatedStats);
     localStorage.setItem('procapture_adstats_db', JSON.stringify(updatedStats));
@@ -518,39 +518,33 @@ export default function App() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
             
             {/* Introductory Hero banner */}
-            <div className={`relative overflow-hidden rounded-2xl border p-6 md:p-10 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-200 ${
-              theme === 'light'
-                ? 'border-zinc-200 bg-white shadow-sm'
-                : 'border-white/10 bg-white/5 shadow-2xl'
-            }`}>
-              <div className="space-y-4 max-w-xl text-center md:text-left">
+            <div 
+              className="relative overflow-hidden rounded-2xl border shadow-2xl flex flex-col items-center justify-center text-center gap-6 transition-all duration-200 py-[60px] px-6 md:py-[80px] md:px-[40px] border-white/10"
+              style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}
+            >
+              {/* Center amber radial golden glow behind headline */}
+              <div 
+                className="absolute pointer-events-none rounded-full blur-[100px]" 
+                style={{
+                  background: 'radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, rgba(251, 191, 36, 0) 70%)',
+                  width: '500px',
+                  height: '500px',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)'
+                }}
+              />
+
+              <div className="space-y-4 max-w-2xl text-center relative z-10">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded-full text-yellow-500 font-mono text-[10px] uppercase tracking-widest font-bold">
                   <Sparkles size={11} /> PROCAPTURE LIGHT OFFICIAL DISTRIBUTOR
                 </div>
-                <h1 className={`text-2xl md:text-4xl font-light tracking-tight leading-none uppercase font-sans ${
-                  theme === 'light' ? 'text-zinc-950 font-semibold' : 'text-white'
-                }`}>
-                  Illuminate Your <span className="italic font-serif text-yellow-500 font-normal">Creative Vision</span>
+                <h1 className="text-[2rem] md:text-[3.5rem] font-black tracking-tight leading-none uppercase font-sans text-white">
+                  ILLUMINATE YOUR <span className="italic font-serif text-yellow-500 font-normal">CREATIVE VISION</span>
                 </h1>
-                <p className={`text-xs md:text-sm leading-relaxed font-sans ${
-                  theme === 'light' ? 'text-zinc-600' : 'text-white/50'
-                }`}>
+                <p className="text-xs md:text-sm leading-relaxed font-sans text-white/70 max-w-xl mx-auto">
                   Browse physical premium studio lighting arrays, heavy-duty stands, softboxes, and bi-color LED accessories. Add products to your list and request immediate pickup or nationwide dispatch securely via WhatsApp.
                 </p>
-              </div>
-              
-              {/* Decorative Camera visual */}
-              <div className="relative flex items-center justify-center shrink-0 w-36 h-36 md:w-44 md:h-44 rounded-xl bg-[#0a0a0a] border border-white/10 shadow-2xl overflow-hidden hidden sm:flex">
-                <img 
-                  src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=300&auto=format&fit=crop" 
-                  alt="Camera Light Setup" 
-                  className="w-full h-full object-cover opacity-60 hover:opacity-80 transition-opacity"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent p-3 flex flex-col justify-end">
-                  <span className="block text-[8px] font-mono text-white/40 uppercase tracking-widest leading-none font-bold">Premium quality</span>
-                  <span className="block text-[10px] font-bold text-yellow-500 uppercase mt-0.5 tracking-wider font-display">PROCAPTURE LIGHT</span>
-                </div>
               </div>
             </div>
 
@@ -761,6 +755,13 @@ export default function App() {
         )}
       </main>
 
+      {/* Footer / Brand tag */}
+      <footer className={`py-8 text-center border-t text-[11px] font-mono tracking-widest uppercase ${
+        theme === 'light' ? 'bg-zinc-50/50 border-zinc-200 text-zinc-400' : 'bg-black/20 border-white/5 text-white/30'
+      }`}>
+        <span>WebMas Designed with love</span>
+      </footer>
+
       {/* --- SIDE CAR DROUTS / SLIDERS --- */}
 
       {/* Persistent Floating Utility Cart Apparent on All Views */}
@@ -802,23 +803,8 @@ export default function App() {
         theme={theme}
       />
 
-      {/* Bottom Sticky Status Bar from design */}
-      <div className={`fixed bottom-0 left-0 right-0 z-30 border-t py-2 px-4 sm:py-2.5 sm:px-6 font-mono text-[10px] flex flex-col sm:flex-row items-center justify-between gap-2.5 transition-all duration-200 ${
-        theme === 'light' ? 'bg-zinc-100 border-zinc-200 text-zinc-500 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]' : 'bg-black border-white/10 text-white/40 shadow-2xl'
-      }`}>
-        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1">
-          <span>NODE: 0816_420_xxxx</span>
-          <span className="hidden sm:inline text-zinc-500/50">|</span>
-          <span>LATENCY: 14ms</span>
-          <span className="hidden sm:inline text-zinc-500/50">|</span>
-          <span>SESSION: ACTIVE</span>
-        </div>
-        <div className={`text-[9px] font-bold uppercase tracking-[0.25em] text-center sm:text-right ${
-          theme === 'light' ? 'text-yellow-605' : 'text-yellow-500'
-        }`}>
-          PROCAPTURE PREMIUM STUDIO LIGHTS
-        </div>
-      </div>
+      {/* Adsterra Popunder (script only, no visual) */}
+      <div id="adsterra-popunder"></div>
 
     </div>
   );

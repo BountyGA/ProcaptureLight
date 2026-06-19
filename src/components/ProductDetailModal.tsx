@@ -26,7 +26,7 @@ export default function ProductDetailModal({
 
   const { name, serialNumber, price, quantityInStock, imageUrl, category, description, features } = product;
 
-  const formattedPrice = `₦${new Intl.NumberFormat('en-NG', {
+  const formattedPrice = `\u20A6${new Intl.NumberFormat('en-NG', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(price)}`;

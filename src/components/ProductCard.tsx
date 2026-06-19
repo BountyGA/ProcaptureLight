@@ -60,7 +60,7 @@ export default function ProductCard({
     );
   };
 
-  const formattedPrice = `₦${new Intl.NumberFormat('en-NG', {
+  const formattedPrice = `\u20A6${new Intl.NumberFormat('en-NG', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(price)}`;

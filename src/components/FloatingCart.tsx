@@ -18,7 +18,7 @@ export default function FloatingCart({ cartItems, onCartToggle }: FloatingCartPr
 
   const totalPrice = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
-  const formattedTotal = `₦${new Intl.NumberFormat('en-NG', {
+  const formattedTotal = `\u20A6${new Intl.NumberFormat('en-NG', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(totalPrice)}`;

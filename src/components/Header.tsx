@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { ShoppingCart, LogIn, LogOut, Search, SlidersHorizontal, Sun, Camera, Lock, Clock, Moon } from 'lucide-react';
+import { ShoppingCart, ShoppingBag, LogIn, LogOut, Search, SlidersHorizontal, Sun, Camera, Lock, Clock, Moon } from 'lucide-react';
 import ProcaptureLogo from './ProcaptureLogo';
 
 interface HeaderProps {
@@ -44,8 +44,8 @@ export default function Header({
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple but secure preset password for local simulation: 'procapture874'
-    if (passwordInput === 'admin' || passwordInput === 'procapture874' || passwordInput === '123') {
+    const requiredPassword = (import.meta as any).env?.VITE_ADMIN_PASSWORD || 'procapture874';
+    if (passwordInput === requiredPassword) {
       onAdminToggle(true);
       setShowLoginModal(false);
       setPasswordInput('');
@@ -164,51 +164,27 @@ export default function Header({
               )}
             </button>
 
-            {/* Past Orders History Trigger */}
-            {!isAdmin && (
-              <button
-                id="past-orders-history-drawer-trigger-btn"
-                onClick={onHistoryToggle}
-                className={`relative p-1.5 py-1 sm:px-3.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer font-semibold uppercase tracking-wider text-xs ${
-                  theme === 'light'
-                    ? 'border-zinc-200 bg-zinc-100 text-zinc-800 hover:text-black hover:bg-zinc-200'
-                    : 'border-white/10 bg-white/5 text-white/85 hover:text-white hover:bg-white/10 hover:border-white/20'
-                }`}
-                title="View past orders"
-              >
-                <div className="relative">
-                  <Clock size={13} className="text-amber-500" />
-                  {orderCount > 0 && (
-                    <span className="absolute -top-2 -right-2 inline-flex items-center justify-center min-w-[12px] h-3 px-1 text-[8px] font-bold leading-none text-black bg-amber-400 rounded-full">
-                      {orderCount}
-                    </span>
-                  )}
-                </div>
-                <span className="text-xs hidden sm:inline">My Orders</span>
-              </button>
-            )}
-
             {/* Cart Trigger */}
             {!isAdmin && (
               <button
                 id="shopping-cart-drawer-trigger-btn"
                 onClick={onCartToggle}
-                className={`relative p-1.5 py-1 sm:px-3.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer font-semibold uppercase tracking-wider text-xs ${
+                className={`relative p-1.5 py-1 sm:px-3.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer font-bold uppercase tracking-wider text-xs ${
                   theme === 'light'
-                    ? 'border-zinc-200 bg-zinc-100 text-zinc-805 hover:text-black hover:bg-zinc-200'
+                    ? 'border-zinc-200 bg-zinc-100 text-zinc-850 hover:text-black hover:bg-zinc-200'
                     : 'border-white/10 bg-white/5 text-white/85 hover:text-white hover:bg-white/10 hover:border-white/20'
                 }`}
-                title="View cart list"
+                title="View cart"
               >
                 <div className="relative">
-                  <ShoppingCart size={13} className="text-yellow-500" />
+                  <ShoppingBag size={13} className="text-yellow-500" />
                   {cartCount > 0 && (
                     <span className="absolute -top-2 -right-2 inline-flex items-center justify-center min-w-[12px] h-3 px-1 text-[8px] font-bold leading-none text-black bg-yellow-500 rounded-full">
                       {cartCount}
                     </span>
                   )}
                 </div>
-                <span className="text-xs hidden sm:inline">Order List</span>
+                <span className="text-xs hidden sm:inline">Cart</span>
               </button>
             )}
           </div>
@@ -262,13 +238,6 @@ export default function Header({
                 </button>
               ))}
             </div>
-            
-            {/* Sub header info message */}
-            <span className={`text-[10px] font-mono tracking-tight text-right shrink-0 hidden lg:inline ${
-              theme === 'light' ? 'text-zinc-500' : 'text-white/40'
-            }`}>
-              Instant checkout carries exact serial numbers directly to Registered WhatsApp
-            </span>
           </div>
         )}
       </div>
@@ -312,9 +281,6 @@ export default function Header({
                   required
                   autoFocus
                 />
-                <span className="block text-[9px] font-mono text-zinc-500 mt-1 bg-zinc-900 border border-zinc-800/30 p-1.5 rounded text-center">
-                  💡 Hint: Enter <code className="text-amber-400 font-bold">procapture874</code> or <code className="text-amber-400 font-bold">123</code> for testing
-                </span>
               </div>
 
               {loginError && (
