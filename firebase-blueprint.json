@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "An authentic model sold by PROCAPTURE.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "serialNumber": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "quantityInStock": {
+          "type": "number"
+        },
+        "inStock": {
+          "type": "boolean"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "features": {
+          "type": "array"
+        },
+        "isFeatured": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "object"
+        }
+      },
+      "required": ["id", "name", "serialNumber", "price", "quantityInStock", "inStock", "imageUrl", "category", "description", "features"]
+    }
+  },
+  "firestore": {
+    "products/{productId}": {
+      "schema": "Product",
+      "description": "Collection of authentic models sold by PROCAPTURE."
+    }
+  }
+}

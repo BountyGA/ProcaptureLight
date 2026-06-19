@@ -6,11 +6,9 @@
 import React, { useState } from 'react';
 import { 
   Package, DollarSign, PlusCircle, Trash2, Edit2, ShoppingBag, 
-  Settings, CheckCircle, TrendingUp, HelpCircle, Save, Sliders, Play, Code, Layers 
+  Settings, CheckCircle, TrendingUp, HelpCircle, Save, Sliders, Play, Code, Layers, Loader2 
 } from 'lucide-react';
 import { Product, Order, AdZone, AdStats } from '../types';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { storage } from '../lib/firebase';
 
 interface AdminPanelProps {
   products: Product[];
@@ -136,7 +134,7 @@ export default function AdminPanel({
     }
 
     if (isUploading) {
-      setFormError('Please wait for the photo file to finish uploading to Firebase Storage.');
+      setFormError('Please wait for the photo file to finish uploading to Cloudinary.');
       return;
     }
 
@@ -328,13 +326,14 @@ export default function AdminPanel({
                   </div>
                 </div>
 
-                {/* Image Upload using Firebase Storage */}
+                {/* Image Upload using Cloudinary */}
                 <div>
                   <label className="block text-[10px] font-mono uppercase text-zinc-500 tracking-wider mb-1 flex justify-between items-center bg-zinc-950 p-1.5 rounded border border-zinc-900 mb-1.5">
-                    <span>Product Photo (Upload to Cloud)</span>
+                    <span>Product Photo (Upload to Cloudinary)</span>
                     {isUploading && (
-                      <span className="text-[10px] text-amber-400 font-bold animate-pulse">
-                        UPLOADING {uploadProgress}%
+                      <span className="text-[10px] text-amber-400 font-bold flex items-center gap-1.5">
+                        <Loader2 size={12} className="animate-spin text-amber-500 animate-duration-1000" />
+                        UPLOADING...
                       </span>
                     )}
                   </label>
@@ -344,45 +343,44 @@ export default function AdminPanel({
                       type="file"
                       id="product-photo-upload"
                       accept="image/*"
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
 
                         setIsUploading(true);
-                        setUploadProgress(0);
                         setFormError('');
 
-                        const timestamp = Date.now();
-                        const fileName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-                        const storagePath = `products/${timestamp}-${fileName}`;
-                        const storageRef = ref(storage, storagePath);
+                        try {
+                          const formData = new FormData();
+                          formData.append("file", file);
+                          formData.append("upload_preset", (import.meta as any).env.VITE_CLOUDINARY_UPLOAD_PRESET || "");
 
-                        const uploadTask = uploadBytesResumable(storageRef, file);
+                          const cloudName = (import.meta as any).env.VITE_CLOUDINARY_CLOUD_NAME || "";
+                          const response = await fetch(
+                            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                            { method: "POST", body: formData }
+                          );
 
-                        uploadTask.on(
-                          'state_changed',
-                          (snapshot) => {
-                            const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                            setUploadProgress(progress);
-                          },
-                          (err) => {
-                            console.error('Image upload failed:', err);
-                            setFormError('Image upload failed: ' + err.message);
-                            setIsUploading(false);
-                          },
-                          async () => {
-                            try {
-                              const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                              setImageUrl(downloadUrl);
-                              setFormSuccess('Image uploaded successfully!');
-                              setIsUploading(false);
-                            } catch (err: any) {
-                              console.error('Failed to get download URL:', err);
-                              setFormError('Failed to capture URL: ' + err.message);
-                              setIsUploading(false);
-                            }
+                          if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Cloudinary upload failed: ${response.status} - ${errorText}`);
                           }
-                        );
+
+                          const data = await response.json();
+                          const uploadedUrl = data.secure_url;
+
+                          if (uploadedUrl) {
+                            setImageUrl(uploadedUrl);
+                            setFormSuccess('Image uploaded successfully to Cloudinary!');
+                          } else {
+                            throw new Error("Unable to obtain secure URL from response.");
+                          }
+                        } catch (err: any) {
+                          console.error('Image upload failed to Cloudinary:', err);
+                          setFormError('Image upload failed: ' + err.message);
+                        } finally {
+                          setIsUploading(false);
+                        }
                       }}
                       className="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-mono file:uppercase file:font-semibold file:bg-amber-400 file:text-black hover:file:bg-amber-350 transition-all text-[11px] cursor-pointer"
                     />

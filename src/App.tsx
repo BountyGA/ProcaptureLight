@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { INITIAL_PRODUCTS } from './data/initialProducts';
 import { Product, CartItem, Order, AdZone, AdStats } from './types';
 import { collection, doc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
-import { db } from './lib/firebase';
+import { db, handleFirestoreError, OperationType } from './lib/firebase';
 import Header from './components/Header';
 import ProductCard from './components/ProductCard';
 import ProductDetailModal from './components/ProductDetailModal';
@@ -123,14 +123,14 @@ export default function App() {
               createdAt: serverTimestamp()
             });
           } catch (err) {
-            console.error("Failed to seed product:", p.name, err);
+            handleFirestoreError(err, OperationType.WRITE, `products/${p.id}`);
           }
         });
       } else {
         setProducts(loadedProducts);
       }
     }, (error) => {
-      console.error("Firestore loading error:", error);
+      handleFirestoreError(error, OperationType.GET, "products");
     });
 
     // 2. Load orders from localStorage
@@ -195,7 +195,7 @@ export default function App() {
         createdAt: serverTimestamp()
       });
     } catch (err) {
-      console.error("Error adding product to Firestore:", err);
+      handleFirestoreError(err, OperationType.WRITE, `products/${newProd.id}`);
     }
   };
 
@@ -215,7 +215,7 @@ export default function App() {
         isFeatured: !!updatedProd.isFeatured
       });
     } catch (err) {
-      console.error("Error updating product in Firestore:", err);
+      handleFirestoreError(err, OperationType.WRITE, `products/${updatedProd.id}`);
     }
   };
 
@@ -224,7 +224,7 @@ export default function App() {
       await deleteDoc(doc(db, "products", productId));
       setCart((prev) => prev.filter((item) => item.product.id !== productId));
     } catch (err) {
-      console.error("Error deleting product from Firestore:", err);
+      handleFirestoreError(err, OperationType.DELETE, `products/${productId}`);
     }
   };
 
@@ -260,7 +260,7 @@ export default function App() {
             category: fallbackCategory
           });
         } catch (err) {
-          console.error("Error updating product category in Firestore:", err);
+          handleFirestoreError(err, OperationType.WRITE, `products/${p.id}`);
         }
       }
     });
@@ -357,7 +357,7 @@ export default function App() {
           inStock: remaining > 0
         });
       } catch (err) {
-        console.error("Error updating stock quantity in Firestore:", err);
+        handleFirestoreError(err, OperationType.WRITE, `products/${c.product.id}`);
       }
     });
 
