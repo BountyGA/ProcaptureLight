@@ -30,7 +30,7 @@ export default function InquiryForm() {
     };
 
     try {
-      const response = await fetch('https://formspree.io/f/xaqzgnyq', {
+      const response = await fetch('https://formspree.io/f/xpqgakrv', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export default function InquiryForm() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} action="https://formspree.io/f/xaqzgnyq" method="POST" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} action="https://formspree.io/f/xpqgakrv" method="POST" className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Full Name */}
         <div className="space-y-1.5">
           <label className="block text-[10px] font-semibold font-mono uppercase text-white/40 tracking-wider">
