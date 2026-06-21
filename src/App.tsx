@@ -13,7 +13,7 @@ import ProductCard from './components/ProductCard';
 import ProductDetailModal from './components/ProductDetailModal';
 import CartDrawer from './components/CartDrawer';
 import AdminPanel from './components/AdminPanel';
-import AdBlock from './components/AdBlock';
+import AdBanner from './components/AdBanner';
 import OrderHistoryDrawer from './components/OrderHistoryDrawer';
 import FloatingCart from './components/FloatingCart';
 import InquiryForm from './components/InquiryForm';
@@ -177,6 +177,31 @@ export default function App() {
       unsubscribeProducts();
     };
   }, []);
+
+
+  // Adsterra Social Bar (all public pages, loads once globally)
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.includes('/admin') || path.includes('/cart') || isAdmin) return;
+    
+    const script = document.createElement('script');
+    script.src = 'https://pl29819787.effectivecpmnetwork.com/f7/fe/b5/f7feb5af08f7e6a3c4ea485283151cff.js';
+    script.async = true;
+    document.head.appendChild(script);
+  }, [isAdmin]);
+
+  // Adsterra Popunder (homepage only, once per session)
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.includes('/admin') || path.includes('/cart') || isAdmin) return;
+    if (sessionStorage.getItem('popunder_shown')) return;
+    
+    const script = document.createElement('script');
+    script.src = 'https://pl29819785.effectivecpmnetwork.com/48/1b/66/481b66136bcdcff4f7aa11b55d1c1bcf.js';
+    script.async = true;
+    document.head.appendChild(script);
+    sessionStorage.setItem('popunder_shown', 'true');
+  }, [isAdmin]);
 
   // --- ACTIONS & PERSISTENCE ---
   const handleAddProduct = async (newProd: Product) => {
@@ -458,6 +483,10 @@ export default function App() {
   const featuredProducts = filteredProducts.filter((p) => p.isFeatured && p.quantityInStock > 0);
   const remainingProducts = filteredProducts.filter((p) => !p.isFeatured || p.quantityInStock === 0);
 
+  const isPublicPage = !isAdmin && !window.location.pathname.includes('/admin') && !window.location.pathname.includes('/cart');
+  const showHeroAd = isPublicPage && remainingProducts.length < 6;
+  const showGridAd = isPublicPage && remainingProducts.length >= 6;
+
   // Helper to integrate Gemini AI drawing helper inside React safely
   const handleAIGearDraw = async (promptText: string, nameText: string) => {
     // Return a beautiful photography studio gear visual
@@ -548,14 +577,9 @@ export default function App() {
               </div>
             </div>
 
-            {/* STRATEGIC ADSTERRA SLOT 1: Leaderboard Banner below main hero */}
-            {adZones.find((z) => z.id === 'z-leader')?.isActive && (
-              <AdBlock
-                zoneId="z-leader"
-                format="Banner 728x90"
-                activeZoneConfig={adZones.find((z) => z.id === 'z-leader')}
-                onAdClick={handleAdClicked}
-              />
+            {/* Adsterra Banner below hero section */}
+            {showHeroAd && (
+              <AdBanner />
             )}
 
             {/* 1. FEATURED SECTION */}
@@ -638,13 +662,7 @@ export default function App() {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 md:gap-4.5">
-                  {/* Stagger items, injecting AD BLOCK right in the middle space strategically */}
                   {remainingProducts.map((p, index) => {
-                    // Inject a native ad card right after the 2nd product if active and valid
-                    const showNativeAd = 
-                      index === 1 && 
-                      adZones.find((z) => z.id === 'z-native')?.isActive;
-
                     return (
                       <React.Fragment key={p.id}>
                         <ProductCard
@@ -654,46 +672,17 @@ export default function App() {
                           cartQuantity={cart.find((item) => item.product.id === p.id)?.quantity || 0}
                           theme={theme}
                         />
-                        {showNativeAd && (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <AdBlock
-                              zoneId="z-native"
-                              format="Native"
-                              activeZoneConfig={adZones.find((z) => z.id === 'z-native')}
-                              onAdClick={handleAdClicked}
-                            />
+                        {showGridAd && (index + 1) % 6 === 0 && index === 5 && (
+                          <div className="col-span-2 sm:col-span-3 lg:col-span-4 xl:col-span-5 flex justify-center py-4">
+                            <AdBanner />
                           </div>
                         )}
                       </React.Fragment>
                     );
                   })}
-
-                  {/* If remainingProducts list is small and we didn't inject native ad, we can place it at the end optionally */}
-                  {remainingProducts.length <= 1 && adZones.find((z) => z.id === 'z-native')?.isActive && (
-                    <div className="col-span-1 flex items-center justify-center">
-                      <AdBlock
-                        zoneId="z-native"
-                        format="Native"
-                        activeZoneConfig={adZones.find((z) => z.id === 'z-native')}
-                        onAdClick={handleAdClicked}
-                      />
-                    </div>
-                  )}
                 </div>
               )}
             </div>
-
-            {/* STRATEGIC ADSTERRA SLOT 3: Square Ad Companion above footer summaries if configured */}
-            {adZones.find((z) => z.id === 'z-square')?.isActive && (
-              <div className="w-full flex justify-center py-4">
-                <AdBlock
-                  zoneId="z-square"
-                  format="Square 300x250"
-                  activeZoneConfig={adZones.find((z) => z.id === 'z-square')}
-                  onAdClick={handleAdClicked}
-                />
-              </div>
-            )}
 
             {/* Direct Studio Inquiry through Formspree */}
             <div className="pt-8">
