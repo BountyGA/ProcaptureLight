@@ -72,7 +72,7 @@ export default function InquiryForm() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} action="https://formspree.io/f/xaqzgnyq" method="POST" className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Full Name */}
         <div className="space-y-1.5">
           <label className="block text-[10px] font-semibold font-mono uppercase text-white/40 tracking-wider">
@@ -81,6 +81,7 @@ export default function InquiryForm() {
           <input
             type="text"
             required
+            name="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. John Doe"
@@ -96,6 +97,7 @@ export default function InquiryForm() {
           <input
             type="email"
             required
+            name="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="e.g. johndoe@example.com"
@@ -110,6 +112,7 @@ export default function InquiryForm() {
           </label>
           <input
             type="tel"
+            name="phone"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="e.g. +234 816 420 xxxx"
@@ -124,6 +127,7 @@ export default function InquiryForm() {
           </label>
           <textarea
             required
+            name="message"
             rows={4}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
