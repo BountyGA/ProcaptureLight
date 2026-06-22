@@ -14,29 +14,22 @@ export default function InquiryForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!name || !email || !message) return;
 
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
-    // Formspree payload
-    const formData = {
-      name,
-      email,
-      phone,
-      message,
-    };
-
     try {
+      const formData = new FormData(e.currentTarget);
+
       const response = await fetch('https://formspree.io/f/xpqgakrv', {
         method: 'POST',
+        body: formData,
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json'
-        },
-        body: JSON.stringify(formData)
+        }
       });
 
       if (response.ok) {
@@ -46,10 +39,12 @@ export default function InquiryForm() {
         setPhone('');
         setMessage('');
       } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Formspree error response received:', errorData);
         setSubmitStatus('error');
       }
     } catch (err) {
-      console.error('Formspree POST failed:', err);
+      console.error('Formspree connection or execution exception:', err);
       setSubmitStatus('error');
     }
 
